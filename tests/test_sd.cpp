@@ -91,19 +91,20 @@ namespace {
                 return file;
             }
 
-            bool free_space(::ungula::sd::SpaceInfo& out) const {
+            bool free_space(::ungula::sd::SpaceInfo& /*out*/) const override {
                 return true;
             }
 
             // Delete a file by path. Returns true on success, false if the file
             // does not exist or cannot be removed.
-            bool remove(const char* path) {
+            bool remove(const char* /*path*/) override {
                 return true;
             }
 
             // List files in a directory. Calls cb once per regular file entry.
             // Returns the number of entries visited (0 if dir is empty or missing).
-            int list_dir(const char* dir_path, ::ungula::sd::DirEntryCallback cb, void* ctx) {
+            int list_dir(const char* /*dir_path*/, ::ungula::sd::DirEntryCallback /*cb*/,
+                         void* /*ctx*/) override {
                 return 0;
             }
     };
