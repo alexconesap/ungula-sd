@@ -12,8 +12,8 @@ See [embLogX logging library](https://github.com/alexconesap/emblogx).
 
 | Header | Class | Purpose |
 | ------ | ----- | ------- |
-| `sd/i_file.h` | `IFile` | Read, write, flush, close. Text helpers included |
-| `sd/i_filesystem.h` | `IFileSystem` | Mount, unmount, open files |
+| `ungula/sd/i_file.h` | `IFile` | Read, write, flush, close. Text helpers included |
+| `ungula/sd/i_filesystem.h` | `IFileSystem` | Mount, unmount, open files |
 
 ### IFile API
 
@@ -42,9 +42,9 @@ For boards that wire the SD slot through generic SPI GPIOs (MOSI/MISO/CLK/CS).
 
 | Header | Class | Purpose |
 | ------ | ----- | ------- |
-| `sd/platform/esp/esp_sd_config.h` | `EspSdSpiConfig` | SPI pin + mount config |
-| `sd/platform/esp/esp_sd_filesystem.h` | `EspSdFilesystem` | SPI-SD via ESP-IDF VFS |
-| `sd/platform/esp/esp_sd_file.h` | `EspSdFile` | FILE* wrapper |
+| `ungula/sd/platform/esp/esp_sd_config.h` | `EspSdSpiConfig` | SPI pin + mount config |
+| `ungula/sd/platform/esp/esp_sd_filesystem.h` | `EspSdFilesystem` | SPI-SD via ESP-IDF VFS |
+| `ungula/sd/platform/esp/esp_sd_file.h` | `EspSdFile` | FILE* wrapper |
 
 ### SDMMC mode (native peripheral)
 
@@ -53,8 +53,8 @@ CLK/CMD/D0-D3 lines. Faster than SPI and supports 4-bit bus width.
 
 | Header | Class | Purpose |
 | ------ | ----- | ------- |
-| `sd/platform/esp/esp_sdmmc_config.h` | `EspSdmmcConfig` | SDMMC pin + bus config |
-| `sd/platform/esp/esp_sdmmc_filesystem.h` | `EspSdmmcFilesystem` | SDMMC via ESP-IDF VFS |
+| `ungula/sd/platform/esp/esp_sdmmc_config.h` | `EspSdmmcConfig` | SDMMC pin + bus config |
+| `ungula/sd/platform/esp/esp_sdmmc_filesystem.h` | `EspSdmmcFilesystem` | SDMMC via ESP-IDF VFS |
 
 Both modes reuse the same `EspSdFile` (FILE* wrapper) and share the
 `IFileSystem` / `IFile` interfaces, so application code is identical
@@ -94,9 +94,9 @@ peripheral (dedicated CLK/CMD/D0-D3 lines, not SPI).
 ```cpp
 // Adjust the pin numbers below to match your board's schematic.
 
-#include <sd/platform/esp/esp_sdmmc_config.h>
-#include <sd/platform/esp/esp_sdmmc_filesystem.h>
-#include <sd/i_file.h>
+#include <ungula/sd/platform/esp/esp_sdmmc_config.h>
+#include <ungula/sd/platform/esp/esp_sdmmc_filesystem.h>
+#include <ungula/sd/i_file.h>
 
 static constexpr ungula::sd::EspSdmmcConfig SD_CFG = {
     .pin_clk  = 7,
@@ -173,9 +173,9 @@ This example uses the low-level byte API instead of the text helpers.
 ```cpp
 // Adjust the pin numbers below to match your board's schematic.
 
-#include <sd/platform/esp/esp_sd_config.h>
-#include <sd/platform/esp/esp_sd_filesystem.h>
-#include <sd/i_file.h>
+#include <ungula/sd/platform/esp/esp_sd_config.h>
+#include <ungula/sd/platform/esp/esp_sd_filesystem.h>
+#include <ungula/sd/i_file.h>
 
 static constexpr ungula::sd::EspSdSpiConfig SD_CFG = {
     .pin_miso = 37,
@@ -252,8 +252,8 @@ audit-level log records are persisted to the SD card automatically.
 #include <emblogx/logger.h>
 #include <emblogx/sinks/console_sink.h>
 #include <emblogx/sinks/sd_sink.h>
-#include <sd/platform/esp/esp_sd_config.h>
-#include <sd/platform/esp/esp_sd_filesystem.h>
+#include <ungula/sd/platform/esp/esp_sd_config.h>
+#include <ungula/sd/platform/esp/esp_sd_filesystem.h>
 
 // Adjust the pin numbers below to match your board's schematic.
 static constexpr ungula::sd::EspSdSpiConfig SD_CFG = {
@@ -337,9 +337,9 @@ Write and read a CSV-style log without emblogx, useful for data export
 or any structured file I/O.
 
 ```cpp
-#include <sd/platform/esp/esp_sd_config.h>
-#include <sd/platform/esp/esp_sd_filesystem.h>
-#include <sd/i_file.h>
+#include <ungula/sd/platform/esp/esp_sd_config.h>
+#include <ungula/sd/platform/esp/esp_sd_filesystem.h>
+#include <ungula/sd/i_file.h>
 
 // Adjust the pin numbers below to match your board's schematic.
 static constexpr ungula::sd::EspSdSpiConfig SD_CFG = {
@@ -413,7 +413,7 @@ Done.
 | "FAILED. Check card and pin mapping." | Wrong pin numbers, card not inserted, or card not FAT32 | Verify schematic, re-seat card, reformat as FAT32 |
 | Mount succeeds but file open fails | Mount point mismatch | File path must start with the same string as `mount_point` (e.g. `/sdcard/`) |
 | Partial writes or empty file | Card full or write-protected | Check capacity, check physical write-protect switch on adapter |
-| Compile error: `sd/platform/esp/...` not found | Library not on include path | Verify `lib_sd` is in your Arduino libraries folder or symlinked |
+| Compile error: `ungula/sd/platform/esp/...` not found | Library not on include path | Verify `lib_sd` is in your Arduino libraries folder or symlinked |
 | `EMBLOGX_ENABLE_SINK_SD` has no effect | Missing `-D` flag | Add `-DEMBLOGX_ENABLE_SINK_SD=1` to your build flags |
 
 ## Acknowledgements

@@ -8,8 +8,8 @@
 #include <string>
 #include <vector>
 
-#include "sd/i_file.h"
-#include "sd/i_filesystem.h"
+#include "ungula/sd/i_file.h"
+#include "ungula/sd/i_filesystem.h"
 
 // ---------------------------------------------------------------------------
 // Mock implementations for host-side testing

@@ -7,5 +7,5 @@
 // Umbrella header — pull in the public interface so host projects only need
 // one #include to discover the library via the Arduino build system.
 
-#include "sd/i_file.h"
-#include "sd/i_filesystem.h"
+#include "ungula/sd/i_file.h"
+#include "ungula/sd/i_filesystem.h"

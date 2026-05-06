@@ -15,9 +15,9 @@ config change.
 ### Use case: mount, write text lines, read back, unmount (SDMMC, 4-bit)
 
 ```cpp
-#include <sd/platform/esp/esp_sdmmc_config.h>
-#include <sd/platform/esp/esp_sdmmc_filesystem.h>
-#include <sd/i_file.h>
+#include <ungula/sd/platform/esp/esp_sdmmc_config.h>
+#include <ungula/sd/platform/esp/esp_sdmmc_filesystem.h>
+#include <ungula/sd/i_file.h>
 
 static constexpr ungula::sd::EspSdmmcConfig CFG = {
     .pin_clk = 7, .pin_cmd = 6,
@@ -64,9 +64,9 @@ Higher throughput than SPI; required for fast bulk writes.
 ### Use case: SPI-mode SD with raw byte I/O
 
 ```cpp
-#include <sd/platform/esp/esp_sd_config.h>
-#include <sd/platform/esp/esp_sd_filesystem.h>
-#include <sd/i_file.h>
+#include <ungula/sd/platform/esp/esp_sd_config.h>
+#include <ungula/sd/platform/esp/esp_sd_filesystem.h>
+#include <ungula/sd/i_file.h>
 
 static constexpr ungula::sd::EspSdSpiConfig CFG = {
     .pin_miso = 37, .pin_mosi = 35, .pin_clk = 36, .pin_cs = 34,
@@ -111,8 +111,8 @@ SPI GPIOs. Simpler wiring, lower throughput than SDMMC.
 ### Use case: query free space and enumerate files
 
 ```cpp
-#include <sd/platform/esp/esp_sd_config.h>
-#include <sd/platform/esp/esp_sd_filesystem.h>
+#include <ungula/sd/platform/esp/esp_sd_config.h>
+#include <ungula/sd/platform/esp/esp_sd_filesystem.h>
 
 static ungula::sd::EspSdFilesystem g_sd(
     ungula::sd::EspSdSpiConfig{ .pin_miso = 13, .pin_mosi = 11,
@@ -148,8 +148,8 @@ old logs), filesystem maintenance.
 ### Use case: dependency-injected `IFileSystem` consumer
 
 ```cpp
-#include <sd/i_filesystem.h>
-#include <sd/i_file.h>
+#include <ungula/sd/i_filesystem.h>
+#include <ungula/sd/i_file.h>
 
 // Library code stays platform-agnostic — no ESP-IDF includes here.
 class AuditWriter {
@@ -246,7 +246,7 @@ ESP32 native-SDMMC pin + bus config.
 
 ### Public interface: `ungula::sd::IFile`
 
-Header: `sd/i_file.h`. Abstract base. Subclasses implement four virtuals;
+Header: `ungula/sd/i_file.h`. Abstract base. Subclasses implement four virtuals;
 the text helpers are non-virtual and built on top of them.
 
 #### Virtual primitives
@@ -282,7 +282,7 @@ the text helpers are non-virtual and built on top of them.
 
 ### Public interface: `ungula::sd::IFileSystem`
 
-Header: `sd/i_filesystem.h`. All methods are pure virtual.
+Header: `ungula/sd/i_filesystem.h`. All methods are pure virtual.
 
 - `virtual bool mount() = 0;`
   Mounts the underlying storage. Returns `true` if the medium is ready.
@@ -310,7 +310,7 @@ Header: `sd/i_filesystem.h`. All methods are pure virtual.
 
 ### Public class: `ungula::sd::EspSdFile`
 
-Header: `sd/platform/esp/esp_sd_file.h` (compiled only when
+Header: `ungula/sd/platform/esp/esp_sd_file.h` (compiled only when
 `ESP_PLATFORM` is defined).
 
 ```cpp
@@ -323,7 +323,7 @@ both ESP backends; rarely instantiated directly. `flush()` calls
 
 ### Public class: `ungula::sd::EspSdFilesystem`
 
-Header: `sd/platform/esp/esp_sd_filesystem.h` (requires `ESP_PLATFORM`).
+Header: `ungula/sd/platform/esp/esp_sd_filesystem.h` (requires `ESP_PLATFORM`).
 
 ```cpp
 explicit EspSdFilesystem(const EspSdSpiConfig& config);
@@ -335,7 +335,7 @@ all `IFileSystem` operations from `EspSdBaseFilesystem`; only
 
 ### Public class: `ungula::sd::EspSdmmcFilesystem`
 
-Header: `sd/platform/esp/esp_sdmmc_filesystem.h` (requires `ESP_PLATFORM`).
+Header: `ungula/sd/platform/esp/esp_sdmmc_filesystem.h` (requires `ESP_PLATFORM`).
 
 ```cpp
 explicit EspSdmmcFilesystem(const EspSdmmcConfig& config);
@@ -427,18 +427,18 @@ card — it will erase any existing filesystem.
 Do not call these directly from application code:
 
 - `ungula::sd::EspSdBaseFilesystem` (header
-  `sd/platform/esp/esp_sd_base_filesystem.h`) — shared base class for
+  `ungula/sd/platform/esp/esp_sd_base_filesystem.h`) — shared base class for
   the two ESP backends. Use `EspSdFilesystem` or `EspSdmmcFilesystem`
   instead. Only `last_error()` is meant to be called through the derived
   class.
 - The protected member `EspSdBaseFilesystem::card_` is a `void*` aliasing
   ESP-IDF's `sdmmc_card_t*` to keep that header out of the public ABI.
   Do not reinterpret-cast it.
-- `.cpp` translation units under `sd/platform/esp/` — backend
+- `.cpp` translation units under `ungula/sd/platform/esp/` — backend
   implementation. Application code includes only the public headers.
-- The umbrella header `ungula_sd.h` exists for Arduino's
-  `#include`-based library discovery. Direct includes of `sd/i_file.h`
-  / `sd/i_filesystem.h` / `sd/platform/esp/...` are equally valid.
+- The umbrella header `ungula/sd.h` exists for Arduino's
+  `#include`-based library discovery. Direct includes of `ungula/sd/i_file.h`
+  / `ungula/sd/i_filesystem.h` / `ungula/sd/platform/esp/...` are equally valid.
 
 ---
 
