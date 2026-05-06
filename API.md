@@ -460,7 +460,7 @@ Do not call these directly from application code:
 - Do not include ESP-IDF / `SD.h` / `FS.h` headers alongside this
   library — the whole point is to keep them encapsulated.
 - Do not call `Arduino`'s `millis()` / `delay()` from code that uses
-  this library; use the project's `ungula::TimeControl` if timing is
+  this library; use the project's `ungula::core::time` if timing is
   needed (project-wide rule, not specific to this library).
 - Do not depend on `EspSdBaseFilesystem` directly. Construct a
   concrete `EspSdFilesystem` or `EspSdmmcFilesystem`.
