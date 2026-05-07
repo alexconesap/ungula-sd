@@ -80,7 +80,7 @@ Host tests use a mock filesystem — no SD hardware needed.
 
 The examples below are complete, self-contained Arduino sketches. Create a
 new project, paste one of them into the `.ino` file, adjust the pin numbers
-to match your board, and upload. Open the Serial Monitor at 115200 baud to
+to match your board, and upload. Check your EmblogX console sink output to
 see the results.
 
 Make sure you have a FAT32-formatted microSD card inserted. On macOS, format
@@ -94,6 +94,8 @@ peripheral (dedicated CLK/CMD/D0-D3 lines, not SPI).
 ```cpp
 // Adjust the pin numbers below to match your board's schematic.
 
+#include <emblogx/logger.h>
+#include <emblogx/sinks/console_sink.h>
 #include <ungula/sd/platform/esp/esp_sdmmc_config.h>
 #include <ungula/sd/platform/esp/esp_sdmmc_filesystem.h>
 #include <ungula/sd/i_file.h>
@@ -112,24 +114,25 @@ static constexpr ungula::sd::EspSdmmcConfig SD_CFG = {
 };
 
 static ungula::sd::EspSdmmcFilesystem g_sd(SD_CFG);
+static emblogx::ConsoleSink g_console;
 
 void setup() {
-    Serial.begin(115200);
-    delay(500);
-    Serial.println("\nSD card test (SDMMC 4-bit)\n");
+    emblogx::register_sink(&g_console);
+    emblogx::init();
+    log_info("SD card test (SDMMC 4-bit)");
 
-    Serial.print("Mounting... ");
+    log_info("Mounting SD card...");
     if (!g_sd.mount()) {
-        Serial.println("FAILED. Check card and pin mapping.");
+        log_error("Mount failed. Check card and pin mapping.");
         return;
     }
-    Serial.println("OK");
+    log_info("Mount OK");
 
     // Write three lines
     const char* path = "/sdcard/test.txt";
     auto* f = g_sd.open(path, ungula::sd::OpenMode::AppendBinary);
     if (!f) {
-        Serial.println("Could not open file for writing.");
+        log_error("Could not open file for writing");
         return;
     }
 
@@ -139,12 +142,12 @@ void setup() {
     f->flush();
     f->close();
     delete f;
-    Serial.println("Wrote 3 lines.");
+    log_info("Wrote 3 lines");
 
     // Read them back, line by line
     f = g_sd.open(path, ungula::sd::OpenMode::ReadBinary);
     if (!f) {
-        Serial.println("Could not open file for reading.");
+        log_error("Could not open file for reading");
         return;
     }
 
@@ -153,13 +156,13 @@ void setup() {
     while (true) {
         size_t len = f->read_line(buf, sizeof(buf));
         if (len == 0) break;
-        Serial.printf("  line %d: %s\n", ++line_num, buf);
+        log_info("line %d: %s", ++line_num, buf);
     }
     f->close();
     delete f;
 
     g_sd.unmount();
-    Serial.println("\nDone. You can also remove the card and check test.txt.");
+    log_info("Done. You can remove the card and check test.txt");
 }
 
 void loop() {}
@@ -173,6 +176,8 @@ This example uses the low-level byte API instead of the text helpers.
 ```cpp
 // Adjust the pin numbers below to match your board's schematic.
 
+#include <emblogx/logger.h>
+#include <emblogx/sinks/console_sink.h>
 #include <ungula/sd/platform/esp/esp_sd_config.h>
 #include <ungula/sd/platform/esp/esp_sd_filesystem.h>
 #include <ungula/sd/i_file.h>
@@ -188,24 +193,25 @@ static constexpr ungula::sd::EspSdSpiConfig SD_CFG = {
 };
 
 static ungula::sd::EspSdFilesystem g_sd(SD_CFG);
+static emblogx::ConsoleSink g_console;
 
 void setup() {
-    Serial.begin(115200);
-    delay(500);
-    Serial.println("\nSD card test (SPI, raw bytes)\n");
+    emblogx::register_sink(&g_console);
+    emblogx::init();
+    log_info("SD card test (SPI, raw bytes)");
 
-    Serial.print("Mounting... ");
+    log_info("Mounting SD card...");
     if (!g_sd.mount()) {
-        Serial.println("FAILED. Check card and pin mapping.");
+        log_error("Mount failed. Check card and pin mapping.");
         return;
     }
-    Serial.println("OK");
+    log_info("Mount OK");
 
     // Write raw bytes
     const char* path = "/sdcard/raw_test.bin";
     auto* f = g_sd.open(path, ungula::sd::OpenMode::AppendBinary);
     if (!f) {
-        Serial.println("Could not open file for writing.");
+        log_error("Could not open file for writing");
         return;
     }
 
@@ -214,12 +220,12 @@ void setup() {
     f->flush();
     f->close();
     delete f;
-    Serial.printf("Wrote %u bytes.\n", (unsigned)written);
+    log_info("Wrote %u bytes", static_cast<unsigned>(written));
 
     // Read them back
     f = g_sd.open(path, ungula::sd::OpenMode::ReadBinary);
     if (!f) {
-        Serial.println("Could not open file for reading.");
+        log_error("Could not open file for reading");
         return;
     }
 
@@ -228,14 +234,13 @@ void setup() {
     f->close();
     delete f;
 
-    Serial.printf("Read %u bytes: ", (unsigned)got);
+    log_info("Read %u bytes", static_cast<unsigned>(got));
     for (size_t i = 0; i < got; ++i) {
-        Serial.printf("%02X ", readback[i]);
+        log_info("byte[%u]=0x%02X", static_cast<unsigned>(i), readback[i]);
     }
-    Serial.println();
 
     g_sd.unmount();
-    Serial.println("Done.");
+    log_info("Done");
 }
 
 void loop() {}
@@ -271,20 +276,18 @@ static emblogx::ConsoleSink g_console;
 static emblogx::SdSink g_sd_sink(g_sd, "/sdcard/audit.log");
 
 void setup() {
-    Serial.begin(115200);
-    delay(500);
-    Serial.println("\nAudit logging to SD card\n");
-
-    if (g_sd.mount()) {
-        Serial.println("SD card mounted.");
-    } else {
-        Serial.println("SD mount failed, audit records will be dropped.");
-    }
-
     // Register sinks and initialize
     emblogx::register_sink(&g_console);   // console: LOG target
     emblogx::register_sink(&g_sd_sink);   // SD: AUDIT target only
     emblogx::init();
+
+    log_info("Audit logging to SD card");
+
+    if (g_sd.mount()) {
+        log_info("SD card mounted");
+    } else {
+        log_warn("SD mount failed, audit records will be dropped");
+    }
 
     // LOG target only -> console, not SD
     log_info("System started, this does NOT go to SD");
@@ -301,15 +304,15 @@ void setup() {
     audit_event(200, "settings", "SETTINGS_CHANGED temp=520 fan=30");
     audit_event(300, "safety", "EMERGENCY_STOP");
 
-    Serial.println("\nDone. Remove SD card and check audit.log.");
-    Serial.println("Each record is one line, flushed immediately.");
-    Serial.println("Power loss mid-write won't corrupt completed lines.");
+    log_info("Done. Remove SD card and check audit.log");
+    log_info("Each record is one line, flushed immediately");
+    log_info("Power loss mid-write won't corrupt completed lines");
 }
 
 void loop() {}
 ```
 
-Expected serial output:
+Expected console output:
 
 ```text
 Audit logging to SD card
@@ -337,6 +340,8 @@ Write and read a CSV-style log without emblogx, useful for data export
 or any structured file I/O.
 
 ```cpp
+#include <emblogx/logger.h>
+#include <emblogx/sinks/console_sink.h>
 #include <ungula/sd/platform/esp/esp_sd_config.h>
 #include <ungula/sd/platform/esp/esp_sd_filesystem.h>
 #include <ungula/sd/i_file.h>
@@ -348,20 +353,21 @@ static constexpr ungula::sd::EspSdSpiConfig SD_CFG = {
 };
 
 static ungula::sd::EspSdFilesystem g_sd(SD_CFG);
+static emblogx::ConsoleSink g_console;
 
 void setup() {
-    Serial.begin(115200);
-    delay(500);
+    emblogx::register_sink(&g_console);
+    emblogx::init();
 
     if (!g_sd.mount()) {
-        Serial.println("SD mount failed.");
+        log_error("SD mount failed");
         return;
     }
 
     // Write CSV header + rows
     auto* f = g_sd.open("/sdcard/data.csv", ungula::sd::OpenMode::AppendBinary);
     if (!f) {
-        Serial.println("Could not create file.");
+        log_error("Could not create file");
         return;
     }
 
@@ -376,19 +382,19 @@ void setup() {
     // Read it back line by line
     f = g_sd.open("/sdcard/data.csv", ungula::sd::OpenMode::ReadBinary);
     if (!f) {
-        Serial.println("Could not open file.");
+        log_error("Could not open file");
         return;
     }
 
     char line[128];
     while (f->read_line(line, sizeof(line)) > 0) {
-        Serial.println(line);
+        log_info("%s", line);
     }
     f->close();
     delete f;
 
     g_sd.unmount();
-    Serial.println("Done.");
+    log_info("Done");
 }
 
 void loop() {}
