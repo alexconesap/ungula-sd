@@ -9,7 +9,8 @@
 #include "esp_sd_base_filesystem.h"
 #include "esp_sd_config.h"
 
-namespace ungula::sd {
+namespace ungula::sd
+{
 
     // ESP32 SPI-mode SD card filesystem. Wraps esp_vfs_fat_sdspi_mount()
     // and exposes file I/O through the IFileSystem / IFile interfaces.
@@ -20,17 +21,20 @@ namespace ungula::sd {
     //   sd.mount();
     //   auto* f = sd.open("/sdcard/audit.log", OpenMode::AppendBinary);
     class EspSdFilesystem : public EspSdBaseFilesystem {
-        public:
-            explicit EspSdFilesystem(const EspSdSpiConfig& config)
-                : EspSdBaseFilesystem(config.mount_point), config_(config) {}
-            ~EspSdFilesystem() override;
+    public:
+        explicit EspSdFilesystem(const EspSdSpiConfig &config)
+                : EspSdBaseFilesystem(config.mount_point)
+                , config_(config)
+        {
+        }
+        ~EspSdFilesystem() override;
 
-            bool mount() override;
-            void unmount() override;
+        bool mount() override;
+        void unmount() override;
 
-        private:
-            EspSdSpiConfig config_;
+    private:
+        EspSdSpiConfig config_;
     };
 
-}  // namespace ungula::sd
-#endif  // ESP_PLATFORM
+} // namespace ungula::sd
+#endif // ESP_PLATFORM

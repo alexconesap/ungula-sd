@@ -9,7 +9,8 @@
 #include "esp_sd_base_filesystem.h"
 #include "esp_sdmmc_config.h"
 
-namespace ungula::sd {
+namespace ungula::sd
+{
 
     // ESP32 native SDMMC filesystem. Wraps esp_vfs_fat_sdmmc_mount() using
     // the SDMMC peripheral (not SPI). Faster than SPI mode and uses the
@@ -22,17 +23,20 @@ namespace ungula::sd {
     //   sd.mount();
     //   auto* f = sd.open("/sdcard/audit.log", OpenMode::AppendBinary);
     class EspSdmmcFilesystem : public EspSdBaseFilesystem {
-        public:
-            explicit EspSdmmcFilesystem(const EspSdmmcConfig& config)
-                : EspSdBaseFilesystem(config.mount_point), config_(config) {}
-            ~EspSdmmcFilesystem() override;
+    public:
+        explicit EspSdmmcFilesystem(const EspSdmmcConfig &config)
+                : EspSdBaseFilesystem(config.mount_point)
+                , config_(config)
+        {
+        }
+        ~EspSdmmcFilesystem() override;
 
-            bool mount() override;
-            void unmount() override;
+        bool mount() override;
+        void unmount() override;
 
-        private:
-            EspSdmmcConfig config_;
+    private:
+        EspSdmmcConfig config_;
     };
 
-}  // namespace ungula::sd
-#endif  // ESP_PLATFORM
+} // namespace ungula::sd
+#endif // ESP_PLATFORM

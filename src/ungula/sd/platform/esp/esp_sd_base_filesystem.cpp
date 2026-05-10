@@ -12,28 +12,31 @@
 
 #include "esp_vfs_fat.h"
 
-namespace ungula::sd {
+namespace ungula::sd
+{
 
-    bool EspSdBaseFilesystem::is_mounted() const {
+    bool EspSdBaseFilesystem::is_mounted() const
+    {
         return mounted_;
     }
 
-    IFile* EspSdBaseFilesystem::open(const char* path, OpenMode mode) {
+    IFile *EspSdBaseFilesystem::open(const char *path, OpenMode mode)
+    {
         if (!mounted_ || path == nullptr) {
             return nullptr;
         }
 
-        const char* mode_str = nullptr;
+        const char *mode_str = nullptr;
         switch (mode) {
-            case OpenMode::AppendBinary:
-                mode_str = "ab";
-                break;
-            case OpenMode::ReadBinary:
-                mode_str = "rb";
-                break;
+        case OpenMode::AppendBinary:
+            mode_str = "ab";
+            break;
+        case OpenMode::ReadBinary:
+            mode_str = "rb";
+            break;
         }
 
-        FILE* fp = std::fopen(path, mode_str);
+        FILE *fp = std::fopen(path, mode_str);
         if (fp == nullptr) {
             return nullptr;
         }
@@ -41,7 +44,8 @@ namespace ungula::sd {
         return new EspSdFile(fp);
     }
 
-    bool EspSdBaseFilesystem::free_space(SpaceInfo& out) const {
+    bool EspSdBaseFilesystem::free_space(SpaceInfo &out) const
+    {
         if (!mounted_) {
             return false;
         }
@@ -54,24 +58,26 @@ namespace ungula::sd {
         return true;
     }
 
-    bool EspSdBaseFilesystem::remove(const char* path) {
+    bool EspSdBaseFilesystem::remove(const char *path)
+    {
         if (!mounted_ || path == nullptr) {
             return false;
         }
         return ::remove(path) == 0;
     }
 
-    int EspSdBaseFilesystem::list_dir(const char* dir_path, DirEntryCallback cb, void* ctx) {
+    int EspSdBaseFilesystem::list_dir(const char *dir_path, DirEntryCallback cb, void *ctx)
+    {
         if (!mounted_ || dir_path == nullptr || cb == nullptr) {
             return 0;
         }
-        DIR* dir = opendir(dir_path);
+        DIR *dir = opendir(dir_path);
         if (dir == nullptr) {
             return 0;
         }
         int count = 0;
-        char full_path[272];  // mount(8) + '/' + d_name(255) + NUL
-        struct dirent* entry;
+        char full_path[272]; // mount(8) + '/' + d_name(255) + NUL
+        struct dirent *entry;
         while ((entry = readdir(dir)) != nullptr) {
             // Skip directories
             if (entry->d_type == DT_DIR) {
@@ -91,5 +97,5 @@ namespace ungula::sd {
         return count;
     }
 
-}  // namespace ungula::sd
-#endif  // ESP_PLATFORM
+} // namespace ungula::sd
+#endif // ESP_PLATFORM

@@ -11,13 +11,16 @@
 #include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
 
-namespace ungula::sd {
+namespace ungula::sd
+{
 
-    EspSdFilesystem::~EspSdFilesystem() {
+    EspSdFilesystem::~EspSdFilesystem()
+    {
         unmount();
     }
 
-    bool EspSdFilesystem::mount() {
+    bool EspSdFilesystem::mount()
+    {
         if (mounted_) {
             return true;
         }
@@ -47,8 +50,7 @@ namespace ungula::sd {
         // pin_cs < 0 means CS is managed externally (e.g. I/O expander) —
         // pass GPIO_NUM_NC so the driver does not toggle any GPIO for CS.
         sdspi_device_config_t slot_cfg = SDSPI_DEVICE_CONFIG_DEFAULT();
-        slot_cfg.gpio_cs =
-                (config_.pin_cs >= 0) ? static_cast<gpio_num_t>(config_.pin_cs) : GPIO_NUM_NC;
+        slot_cfg.gpio_cs = (config_.pin_cs >= 0) ? static_cast<gpio_num_t>(config_.pin_cs) : GPIO_NUM_NC;
         slot_cfg.host_id = SPI2_HOST;
 
         // VFS FAT mount configuration
@@ -59,9 +61,8 @@ namespace ungula::sd {
 
         sdmmc_host_t host = SDSPI_HOST_DEFAULT();
 
-        sdmmc_card_t* card = nullptr;
-        last_error_ =
-                esp_vfs_fat_sdspi_mount(config_.mount_point, &host, &slot_cfg, &mount_cfg, &card);
+        sdmmc_card_t *card = nullptr;
+        last_error_ = esp_vfs_fat_sdspi_mount(config_.mount_point, &host, &slot_cfg, &mount_cfg, &card);
         if (last_error_ != ESP_OK) {
             return false;
         }
@@ -71,15 +72,16 @@ namespace ungula::sd {
         return true;
     }
 
-    void EspSdFilesystem::unmount() {
+    void EspSdFilesystem::unmount()
+    {
         if (!mounted_ || card_ == nullptr) {
             return;
         }
-        esp_vfs_fat_sdcard_unmount(config_.mount_point, static_cast<sdmmc_card_t*>(card_));
+        esp_vfs_fat_sdcard_unmount(config_.mount_point, static_cast<sdmmc_card_t *>(card_));
         spi_bus_free(SPI2_HOST);
         card_ = nullptr;
         mounted_ = false;
     }
 
-}  // namespace ungula::sd
-#endif  // ESP_PLATFORM
+} // namespace ungula::sd
+#endif // ESP_PLATFORM

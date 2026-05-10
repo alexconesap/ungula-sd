@@ -15,107 +15,118 @@
 // Mock implementations for host-side testing
 // ---------------------------------------------------------------------------
 
-namespace {
+namespace
+{
 
     // In-memory file that captures writes and supports read-back with a cursor.
     class MockFile : public ::ungula::sd::IFile {
-        public:
-            std::string data;
-            size_t read_pos = 0;
-            int flush_count = 0;
-            bool closed = false;
+    public:
+        std::string data;
+        size_t read_pos = 0;
+        int flush_count = 0;
+        bool closed = false;
 
-            size_t write(const void* buf, size_t len) override {
-                if (closed) {
-                    return 0;
-                }
-                data.append(static_cast<const char*>(buf), len);
-                return len;
+        size_t write(const void *buf, size_t len) override
+        {
+            if (closed) {
+                return 0;
             }
+            data.append(static_cast<const char *>(buf), len);
+            return len;
+        }
 
-            size_t read(void* buf, size_t len) override {
-                if (closed || read_pos >= data.size()) {
-                    return 0;
-                }
-                size_t avail = data.size() - read_pos;
-                size_t count = (len < avail) ? len : avail;
-                std::memcpy(buf, data.data() + read_pos, count);
-                read_pos += count;
-                return count;
+        size_t read(void *buf, size_t len) override
+        {
+            if (closed || read_pos >= data.size()) {
+                return 0;
             }
+            size_t avail = data.size() - read_pos;
+            size_t count = (len < avail) ? len : avail;
+            std::memcpy(buf, data.data() + read_pos, count);
+            read_pos += count;
+            return count;
+        }
 
-            bool flush() override {
-                if (closed) {
-                    return false;
-                }
-                ++flush_count;
-                return true;
+        bool flush() override
+        {
+            if (closed) {
+                return false;
             }
+            ++flush_count;
+            return true;
+        }
 
-            void close() override {
-                closed = true;
-            }
+        void close() override
+        {
+            closed = true;
+        }
     };
 
     // In-memory filesystem that tracks mount state and returns MockFile
     // instances from open().
     class MockFileSystem : public ::ungula::sd::IFileSystem {
-        public:
-            bool mounted = false;
-            bool mount_should_fail = false;
-            std::vector<MockFile*> opened_files;
+    public:
+        bool mounted = false;
+        bool mount_should_fail = false;
+        std::vector<MockFile *> opened_files;
 
-            bool mount() override {
-                if (mount_should_fail) {
-                    return false;
-                }
-                mounted = true;
-                return true;
+        bool mount() override
+        {
+            if (mount_should_fail) {
+                return false;
             }
+            mounted = true;
+            return true;
+        }
 
-            void unmount() override {
-                mounted = false;
-            }
+        void unmount() override
+        {
+            mounted = false;
+        }
 
-            bool is_mounted() const override {
-                return mounted;
-            }
+        bool is_mounted() const override
+        {
+            return mounted;
+        }
 
-            ::ungula::sd::IFile* open(const char* /*path*/,
-                                      ::ungula::sd::OpenMode /*mode*/) override {
-                if (!mounted) {
-                    return nullptr;
-                }
-                auto* file = new MockFile();
-                opened_files.push_back(file);
-                return file;
+        ::ungula::sd::IFile *open(const char * /*path*/, ::ungula::sd::OpenMode /*mode*/) override
+        {
+            if (!mounted) {
+                return nullptr;
             }
+            auto *file = new MockFile();
+            opened_files.push_back(file);
+            return file;
+        }
 
-            bool free_space(::ungula::sd::SpaceInfo& /*out*/) const override {
-                return true;
-            }
+        bool free_space(::ungula::sd::SpaceInfo & /*out*/) const override
+        {
+            return true;
+        }
 
-            // Delete a file by path. Returns true on success, false if the file
-            // does not exist or cannot be removed.
-            bool remove(const char* /*path*/) override {
-                return true;
-            }
+        // Delete a file by path. Returns true on success, false if the file
+        // does not exist or cannot be removed.
+        bool remove(const char * /*path*/) override
+        {
+            return true;
+        }
 
-            // List files in a directory. Calls cb once per regular file entry.
-            // Returns the number of entries visited (0 if dir is empty or missing).
-            int list_dir(const char* /*dir_path*/, ::ungula::sd::DirEntryCallback /*cb*/,
-                         void* /*ctx*/) override {
-                return 0;
-            }
+        // List files in a directory. Calls cb once per regular file entry.
+        // Returns the number of entries visited (0 if dir is empty or missing).
+        int list_dir(const char * /*dir_path*/, ::ungula::sd::DirEntryCallback /*cb*/, void * /*ctx*/) override
+        {
+            return 0;
+        }
     };
 
-}  // namespace
+} // namespace
 
 // ---------------------------------------------------------------------------
 // IFileSystem contract
 // ---------------------------------------------------------------------------
 
-TEST(FileSystem, MountAndUnmount) {
+TEST(FileSystem, MountAndUnmount)
+{
     MockFileSystem fs;
     EXPECT_FALSE(fs.is_mounted());
 
@@ -129,23 +140,26 @@ TEST(FileSystem, MountAndUnmount) {
     EXPECT_FALSE(fs.is_mounted());
 }
 
-TEST(FileSystem, MountFailure) {
+TEST(FileSystem, MountFailure)
+{
     MockFileSystem fs;
     fs.mount_should_fail = true;
     EXPECT_FALSE(fs.mount());
     EXPECT_FALSE(fs.is_mounted());
 }
 
-TEST(FileSystem, OpenFailsWhenNotMounted) {
+TEST(FileSystem, OpenFailsWhenNotMounted)
+{
     MockFileSystem fs;
-    auto* file = fs.open("/test.log", ::ungula::sd::OpenMode::AppendBinary);
+    auto *file = fs.open("/test.log", ::ungula::sd::OpenMode::AppendBinary);
     EXPECT_EQ(file, nullptr);
 }
 
-TEST(FileSystem, OpenSucceedsWhenMounted) {
+TEST(FileSystem, OpenSucceedsWhenMounted)
+{
     MockFileSystem fs;
     fs.mount();
-    auto* file = fs.open("/test.log", ::ungula::sd::OpenMode::AppendBinary);
+    auto *file = fs.open("/test.log", ::ungula::sd::OpenMode::AppendBinary);
     ASSERT_NE(file, nullptr);
     delete file;
 }
@@ -154,10 +168,11 @@ TEST(FileSystem, OpenSucceedsWhenMounted) {
 // Low-level byte I/O
 // ---------------------------------------------------------------------------
 
-TEST(File, WriteAndFlush) {
+TEST(File, WriteAndFlush)
+{
     MockFile file;
 
-    const char* msg = "hello audit";
+    const char *msg = "hello audit";
     size_t written = file.write(msg, std::strlen(msg));
     EXPECT_EQ(written, std::strlen(msg));
     EXPECT_EQ(file.data, "hello audit");
@@ -166,7 +181,8 @@ TEST(File, WriteAndFlush) {
     EXPECT_EQ(file.flush_count, 1);
 }
 
-TEST(File, ReadBack) {
+TEST(File, ReadBack)
+{
     MockFile file;
     file.write("abcdef", 6);
 
@@ -181,7 +197,8 @@ TEST(File, ReadBack) {
     EXPECT_EQ(file.read(buf, 3), 0u);
 }
 
-TEST(File, WriteAfterCloseReturnsZero) {
+TEST(File, WriteAfterCloseReturnsZero)
+{
     MockFile file;
     file.write("before", 6);
     file.close();
@@ -191,7 +208,8 @@ TEST(File, WriteAfterCloseReturnsZero) {
     EXPECT_FALSE(file.flush());
 }
 
-TEST(File, MultipleWritesAccumulate) {
+TEST(File, MultipleWritesAccumulate)
+{
     MockFile file;
     file.write("line1\n", 6);
     file.write("line2\n", 6);
@@ -202,7 +220,8 @@ TEST(File, MultipleWritesAccumulate) {
 // High-level text helpers
 // ---------------------------------------------------------------------------
 
-TEST(TextHelpers, WriteStr) {
+TEST(TextHelpers, WriteStr)
+{
     MockFile file;
     file.write_str("hello");
     EXPECT_EQ(file.data, "hello");
@@ -211,27 +230,31 @@ TEST(TextHelpers, WriteStr) {
     EXPECT_EQ(file.data, "hello world");
 }
 
-TEST(TextHelpers, WriteStrNullIsNoOp) {
+TEST(TextHelpers, WriteStrNullIsNoOp)
+{
     MockFile file;
     EXPECT_EQ(file.write_str(nullptr), 0u);
     EXPECT_TRUE(file.data.empty());
 }
 
-TEST(TextHelpers, WriteLineFromCStr) {
+TEST(TextHelpers, WriteLineFromCStr)
+{
     MockFile file;
     file.write_line("first line");
     file.write_line("second line");
     EXPECT_EQ(file.data, "first line\nsecond line\n");
 }
 
-TEST(TextHelpers, WriteLineFromPointerAndLength) {
+TEST(TextHelpers, WriteLineFromPointerAndLength)
+{
     MockFile file;
-    const char* text = "partial match here";
-    file.write_line(text, 7);  // "partial"
+    const char *text = "partial match here";
+    file.write_line(text, 7); // "partial"
     EXPECT_EQ(file.data, "partial\n");
 }
 
-TEST(TextHelpers, ReadLine) {
+TEST(TextHelpers, ReadLine)
+{
     MockFile file;
     file.data = "first\nsecond\nthird";
     // read_pos starts at 0
@@ -255,17 +278,19 @@ TEST(TextHelpers, ReadLine) {
     EXPECT_EQ(len, 0u);
 }
 
-TEST(TextHelpers, ReadLineTruncatesWhenBufferTooSmall) {
+TEST(TextHelpers, ReadLineTruncatesWhenBufferTooSmall)
+{
     MockFile file;
     file.data = "a very long line\n";
 
-    char buf[6] = {};  // can hold 5 chars + null
+    char buf[6] = {}; // can hold 5 chars + null
     size_t len = file.read_line(buf, sizeof(buf));
     EXPECT_EQ(len, 5u);
     EXPECT_STREQ(buf, "a ver");
 }
 
-TEST(TextHelpers, ReadLineNullBufferReturnsZero) {
+TEST(TextHelpers, ReadLineNullBufferReturnsZero)
+{
     MockFile file;
     file.data = "something\n";
     EXPECT_EQ(file.read_line(nullptr, 64), 0u);
@@ -275,11 +300,12 @@ TEST(TextHelpers, ReadLineNullBufferReturnsZero) {
 // Integration: filesystem + file round-trip
 // ---------------------------------------------------------------------------
 
-TEST(Integration, OpenWriteFlushClose) {
+TEST(Integration, OpenWriteFlushClose)
+{
     MockFileSystem fs;
     fs.mount();
 
-    auto* file = fs.open("/sdcard/audit.log", ::ungula::sd::OpenMode::AppendBinary);
+    auto *file = fs.open("/sdcard/audit.log", ::ungula::sd::OpenMode::AppendBinary);
     ASSERT_NE(file, nullptr);
 
     file->write_line("[INFO] PROGRAM_SELECT idx=3");

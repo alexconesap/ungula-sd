@@ -8,33 +8,38 @@
 
 #include "../../i_filesystem.h"
 
-namespace ungula::sd {
+namespace ungula::sd
+{
 
     // Shared base for ESP32 SD filesystem implementations. The VFS file
     // operations (open, free_space, remove, list_dir) are identical for both
     // SPI and SDMMC — only mount/unmount differ because they configure
     // different host peripherals. This base avoids duplicating that code.
     class EspSdBaseFilesystem : public IFileSystem {
-        public:
-            bool is_mounted() const override;
-            IFile* open(const char* path, OpenMode mode) override;
-            bool free_space(SpaceInfo& out) const override;
-            bool remove(const char* path) override;
-            int list_dir(const char* dir_path, DirEntryCallback cb, void* ctx) override;
+    public:
+        bool is_mounted() const override;
+        IFile *open(const char *path, OpenMode mode) override;
+        bool free_space(SpaceInfo &out) const override;
+        bool remove(const char *path) override;
+        int list_dir(const char *dir_path, DirEntryCallback cb, void *ctx) override;
 
-            /// Last ESP-IDF error code from mount(). 0 (ESP_OK) on success.
-            int last_error() const {
-                return last_error_;
-            }
+        /// Last ESP-IDF error code from mount(). 0 (ESP_OK) on success.
+        int last_error() const
+        {
+            return last_error_;
+        }
 
-        protected:
-            explicit EspSdBaseFilesystem(const char* mount_point) : mount_point_(mount_point) {}
+    protected:
+        explicit EspSdBaseFilesystem(const char *mount_point)
+                : mount_point_(mount_point)
+        {
+        }
 
-            const char* mount_point_;
-            void* card_ = nullptr;  // sdmmc_card_t* — opaque to avoid ESP-IDF header leak
-            bool mounted_ = false;
-            int last_error_ = 0;
+        const char *mount_point_;
+        void *card_ = nullptr; // sdmmc_card_t* — opaque to avoid ESP-IDF header leak
+        bool mounted_ = false;
+        int last_error_ = 0;
     };
 
-}  // namespace ungula::sd
-#endif  // ESP_PLATFORM
+} // namespace ungula::sd
+#endif // ESP_PLATFORM

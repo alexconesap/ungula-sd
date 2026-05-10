@@ -10,19 +10,22 @@
 #include "esp_vfs_fat.h"
 #include "sdmmc_cmd.h"
 
-namespace ungula::sd {
+namespace ungula::sd
+{
 
-    EspSdmmcFilesystem::~EspSdmmcFilesystem() {
+    EspSdmmcFilesystem::~EspSdmmcFilesystem()
+    {
         unmount();
     }
 
-    bool EspSdmmcFilesystem::mount() {
+    bool EspSdmmcFilesystem::mount()
+    {
         if (mounted_) {
             return true;
         }
 
         if (config_.pin_clk < 0 || config_.pin_cmd < 0 || config_.pin_d0 < 0) {
-            last_error_ = -1;  // invalid pin configuration
+            last_error_ = -1; // invalid pin configuration
             return false;
         }
 
@@ -33,8 +36,7 @@ namespace ungula::sd {
         slot_cfg.cmd = static_cast<gpio_num_t>(config_.pin_cmd);
         slot_cfg.d0 = static_cast<gpio_num_t>(config_.pin_d0);
 
-        if (config_.bus_width_4 && config_.pin_d1 >= 0 && config_.pin_d2 >= 0 &&
-            config_.pin_d3 >= 0) {
+        if (config_.bus_width_4 && config_.pin_d1 >= 0 && config_.pin_d2 >= 0 && config_.pin_d3 >= 0) {
             slot_cfg.d1 = static_cast<gpio_num_t>(config_.pin_d1);
             slot_cfg.d2 = static_cast<gpio_num_t>(config_.pin_d2);
             slot_cfg.d3 = static_cast<gpio_num_t>(config_.pin_d3);
@@ -48,9 +50,8 @@ namespace ungula::sd {
         mount_cfg.max_files = config_.max_files;
         mount_cfg.allocation_unit_size = 16 * 1024;
 
-        sdmmc_card_t* card = nullptr;
-        last_error_ =
-                esp_vfs_fat_sdmmc_mount(config_.mount_point, &host, &slot_cfg, &mount_cfg, &card);
+        sdmmc_card_t *card = nullptr;
+        last_error_ = esp_vfs_fat_sdmmc_mount(config_.mount_point, &host, &slot_cfg, &mount_cfg, &card);
         if (last_error_ != ESP_OK) {
             return false;
         }
@@ -60,14 +61,15 @@ namespace ungula::sd {
         return true;
     }
 
-    void EspSdmmcFilesystem::unmount() {
+    void EspSdmmcFilesystem::unmount()
+    {
         if (!mounted_ || card_ == nullptr) {
             return;
         }
-        esp_vfs_fat_sdcard_unmount(config_.mount_point, static_cast<sdmmc_card_t*>(card_));
+        esp_vfs_fat_sdcard_unmount(config_.mount_point, static_cast<sdmmc_card_t *>(card_));
         card_ = nullptr;
         mounted_ = false;
     }
 
-}  // namespace ungula::sd
-#endif  // ESP_PLATFORM
+} // namespace ungula::sd
+#endif // ESP_PLATFORM
