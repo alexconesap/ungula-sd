@@ -32,6 +32,8 @@ namespace ungula::sd
         sdmmc_host_t host = SDMMC_HOST_DEFAULT();
 
         sdmmc_slot_config_t slot_cfg = SDMMC_SLOT_CONFIG_DEFAULT();
+
+#if SOC_SDMMC_USE_GPIO_MATRIX
         slot_cfg.clk = static_cast<gpio_num_t>(config_.pin_clk);
         slot_cfg.cmd = static_cast<gpio_num_t>(config_.pin_cmd);
         slot_cfg.d0 = static_cast<gpio_num_t>(config_.pin_d0);
@@ -44,6 +46,12 @@ namespace ungula::sd
         } else {
             slot_cfg.width = 1;
         }
+#else
+        // Targets without SDMMC GPIO matrix (e.g. ESP32) don't expose
+        // per-pin members in sdmmc_slot_config_t. Keep default IOMUX pins
+        // selected by SDMMC_SLOT_CONFIG_DEFAULT() and only set bus width.
+        slot_cfg.width = config_.bus_width_4 ? 4 : 1;
+#endif
 
         esp_vfs_fat_sdmmc_mount_config_t mount_cfg = {};
         mount_cfg.format_if_mount_failed = config_.format_if_mount_failed;
