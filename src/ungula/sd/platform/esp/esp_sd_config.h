@@ -9,13 +9,13 @@
 namespace ungula::sd
 {
 
-    // SPI pin configuration for the SD card slot. Values are GPIO numbers
-    // specific to the board in use — the host project fills this in from
-    // its device_config.h.
-    //
-    // pin_cs = -1 means "CS managed externally" (e.g. via an I/O expander).
-    // The caller must assert CS LOW before calling mount().
-    struct EspSdSpiConfig {
+// SPI pin configuration for the SD card slot. Values are GPIO numbers
+// specific to the board in use — the host project fills this in from
+// its device_config.h.
+//
+// pin_cs = -1 means "CS managed externally" (e.g. via an I/O expander).
+// The caller must assert CS LOW before calling mount().
+struct EspSdSpiConfig {
         int8_t pin_miso = -1;
         int8_t pin_mosi = -1;
         int8_t pin_clk = -1;
@@ -31,6 +31,6 @@ namespace ungula::sd
 
         // Format the card if mount fails (first use with a blank card).
         bool format_if_mount_failed = false;
-    };
+};
 
 } // namespace ungula::sd

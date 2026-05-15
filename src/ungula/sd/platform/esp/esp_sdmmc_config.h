@@ -11,9 +11,9 @@
 namespace ungula::sd
 {
 
-    // SDMMC pin configuration for boards that use the native SDMMC peripheral
-    // with dedicated CLK/CMD/D0-D3 lines instead of SPI.
-    struct EspSdmmcConfig {
+// SDMMC pin configuration for boards that use the native SDMMC peripheral
+// with dedicated CLK/CMD/D0-D3 lines instead of SPI.
+struct EspSdmmcConfig {
         int8_t pin_clk = -1; // CLK
         int8_t pin_cmd = -1; // CMD
         int8_t pin_d0 = -1; // DATA0
@@ -33,7 +33,7 @@ namespace ungula::sd
 
         // Format the card if mount fails (first use with a blank card).
         bool format_if_mount_failed = false;
-    };
+};
 
 } // namespace ungula::sd
 #endif // ESP_PLATFORM

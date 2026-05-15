@@ -11,9 +11,9 @@
 namespace ungula::sd
 {
 
-    // Handle to an open file. Callers obtain one from IFileSystem::open()
-    // and must call close() when done (or let the destructor handle it).
-    class IFile {
+// Handle to an open file. Callers obtain one from IFileSystem::open()
+// and must call close() when done (or let the destructor handle it).
+class IFile {
     public:
         virtual ~IFile() = default;
 
@@ -41,29 +41,29 @@ namespace ungula::sd
         // Write a null-terminated C string (without the null terminator).
         size_t write_str(const char *str)
         {
-            if (str == nullptr) {
-                return 0;
-            }
-            return write(str, std::strlen(str));
+                if (str == nullptr) {
+                        return 0;
+                }
+                return write(str, std::strlen(str));
         }
 
         // Write a text line: the string followed by '\n'.
         // Returns total bytes written (string + newline).
         size_t write_line(const char *str)
         {
-            size_t n = write_str(str);
-            const char nl = '\n';
-            n += write(&nl, 1);
-            return n;
+                size_t n = write_str(str);
+                const char nl = '\n';
+                n += write(&nl, 1);
+                return n;
         }
 
         // Write a text line from a pointer + length, followed by '\n'.
         size_t write_line(const char *data, size_t len)
         {
-            size_t n = write(data, len);
-            const char nl = '\n';
-            n += write(&nl, 1);
-            return n;
+                size_t n = write(data, len);
+                const char nl = '\n';
+                n += write(&nl, 1);
+                return n;
         }
 
         // Read one line of text (up to max_len - 1 characters). Stops at '\n',
@@ -72,24 +72,24 @@ namespace ungula::sd
         // Returns the number of characters placed in buf (excluding the null).
         size_t read_line(char *buf, size_t max_len)
         {
-            if (buf == nullptr || max_len == 0) {
-                return 0;
-            }
-            size_t pos = 0;
-            while (pos < max_len - 1) {
-                char ch = 0;
-                size_t got = read(&ch, 1);
-                if (got == 0) {
-                    break; // EOF
+                if (buf == nullptr || max_len == 0) {
+                        return 0;
                 }
-                if (ch == '\n') {
-                    break; // end of line (not stored)
+                size_t pos = 0;
+                while (pos < max_len - 1) {
+                        char ch = 0;
+                        size_t got = read(&ch, 1);
+                        if (got == 0) {
+                                break; // EOF
+                        }
+                        if (ch == '\n') {
+                                break; // end of line (not stored)
+                        }
+                        buf[pos++] = ch;
                 }
-                buf[pos++] = ch;
-            }
-            buf[pos] = '\0';
-            return pos;
+                buf[pos] = '\0';
+                return pos;
         }
-    };
+};
 
 } // namespace ungula::sd

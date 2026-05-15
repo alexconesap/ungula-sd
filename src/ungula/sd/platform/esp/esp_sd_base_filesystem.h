@@ -11,11 +11,11 @@
 namespace ungula::sd
 {
 
-    // Shared base for ESP32 SD filesystem implementations. The VFS file
-    // operations (open, free_space, remove, list_dir) are identical for both
-    // SPI and SDMMC — only mount/unmount differ because they configure
-    // different host peripherals. This base avoids duplicating that code.
-    class EspSdBaseFilesystem : public IFileSystem {
+// Shared base for ESP32 SD filesystem implementations. The VFS file
+// operations (open, free_space, remove, list_dir) are identical for both
+// SPI and SDMMC — only mount/unmount differ because they configure
+// different host peripherals. This base avoids duplicating that code.
+class EspSdBaseFilesystem : public IFileSystem {
     public:
         bool is_mounted() const override;
         IFile *open(const char *path, OpenMode mode) override;
@@ -26,7 +26,7 @@ namespace ungula::sd
         /// Last ESP-IDF error code from mount(). 0 (ESP_OK) on success.
         int last_error() const
         {
-            return last_error_;
+                return last_error_;
         }
 
     protected:
@@ -39,7 +39,7 @@ namespace ungula::sd
         void *card_ = nullptr; // sdmmc_card_t* — opaque to avoid ESP-IDF header leak
         bool mounted_ = false;
         int last_error_ = 0;
-    };
+};
 
 } // namespace ungula::sd
 #endif // ESP_PLATFORM
