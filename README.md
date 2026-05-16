@@ -2,11 +2,31 @@
 
 > **High-performance embedded C++ libraries for ESP32, STM32 and other MCUs** — SD card filesystem abstraction (SPI and SDMMC).
 
+> **LLM usage note:** if this library is consumed from a coding AI workflow, explicitly point the agent to `API.md` first. `API.md` is the LLM-facing contract (public API + examples + constraints) and avoids wasting time/tokens scanning source files and this human-oriented README.
+
 Portable SD card filesystem abstraction. Provides a platform-agnostic file
 I/O interface (`IFileSystem`, `IFile`) so consumers like emblogx's `SdSink`
 never touch platform-specific SD/SPI APIs directly.
 
 See [embLogX logging library](https://github.com/alexconesap/emblogx).
+
+## Table of Contents
+
+- [Interface](#interface)
+  - [IFile API](#ifile-api)
+- [ESP32 Implementation](#esp32-implementation)
+  - [SPI mode](#spi-mode)
+  - [SDMMC mode (native peripheral)](#sdmmc-mode-native-peripheral)
+- [Testing](#testing)
+- [Quick-start: verify SD card on your hardware](#quick-start-verify-sd-card-on-your-hardware)
+  - [Example 1 — SDMMC mode, write and read text lines](#example-1-sdmmc-mode-write-and-read-text-lines)
+  - [Example 2 — SPI mode, raw byte read/write](#example-2-spi-mode-raw-byte-readwrite)
+  - [Example 3 — Integrate with emblogx audit logging](#example-3-integrate-with-emblogx-audit-logging)
+  - [Example 4 — General-purpose text file logging](#example-4-general-purpose-text-file-logging)
+- [Troubleshooting](#troubleshooting)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
+- [Arduino CLI symlink note (rarely relevant)](#arduino-cli-symlink-note-rarely-relevant)
 
 ## Interface
 

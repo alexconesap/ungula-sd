@@ -10,6 +10,30 @@ config change.
 
 ---
 
+## LLM quick map
+
+- **Primary include**: `#include <ungula/sd.h>`.
+- **Arduino discovery include**: `#include <ungula_sd.h>` (forwarder only; host code should keep using the real header).
+- **Namespace root**: `ungula::sd`.
+- **Language baseline**: C++17 minimum (examples avoid post-C++17 requirements).
+- **Supported architectures**: `esp32`.
+- **Read order for coding agents**: `Usage` (working patterns) -> `API` (symbols/signatures) -> `Lifecycle`/`Error handling`/`Threading` notes in this file.
+
+### Use-case index
+
+- [Use case: mount, write text lines, read back, unmount (SDMMC, 4-bit)](#use-case-mount-write-text-lines-read-back-unmount-sdmmc-4-bit)
+- [Use case: SPI-mode SD with raw byte I/O](#use-case-spi-mode-sd-with-raw-byte-io)
+- [Use case: query free space and enumerate files](#use-case-query-free-space-and-enumerate-files)
+- [Use case: dependency-injected `IFileSystem` consumer](#use-case-dependency-injected-ifilesystem-consumer)
+
+### LLM rules
+
+- Use only symbols and include paths documented in this file; do not infer extra public API from implementation files.
+- Prefer the use-case patterns here over ad-hoc rewrites; keep dependency wiring and lifecycle order identical unless the task explicitly changes API design.
+- Treat headers under `detail/`, `platform/`, and `platforms/` as internal unless this document calls them out as public.
+- If required behavior is missing from the documented API, report the gap explicitly instead of inventing new public symbols.
+
+
 ## Usage
 
 ### Use case: mount, write text lines, read back, unmount (SDMMC, 4-bit)
