@@ -15,7 +15,9 @@ config change.
 - **Primary include**: `#include <ungula/sd.h>`.
 - **Arduino discovery include**: `#include <ungula_sd.h>` (forwarder only; host code should keep using the real header).
 - **Namespace root**: `ungula::sd`.
-- **Language baseline**: C++17 minimum (examples avoid post-C++17 requirements).
+- **Own source minimum**: `C++17`.
+- **Effective minimum for consumers**: `C++17`.
+- **Dependency impact**: None (no declared internal dependencies).
 - **Supported architectures**: `esp32`.
 - **Read order for coding agents**: `Usage` (working patterns) -> `API` (symbols/signatures) -> `Lifecycle`/`Error handling`/`Threading` notes in this file.
 
